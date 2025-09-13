@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Doodle Gallery</title>
+  <style>
+    
+  </style>
+</head>
+<body>
+  <header class="authors" role="navigation" aria-label="Authors">
+    <div class="authors-inner" id="authorBar" tabindex="0"></div>
+  </header>
+
+  <main class="wrap" id="app">
+    <section class="hero" aria-live="polite">
+      <h1 class="title">Welcome to the Doodle Gallery</h1>
+      <p class="subtitle">Browse drawings by author. Click a name above—images fade in smoothly. Add new works by editing <code>drawings.json</code> only.</p>
+    </section>
+
+    <section class="controls">
+      <div class="crumb" id="crumb">All authors</div>
+      <div class="view-row">
+        <label for="sort">Sort by date:</label>
+        <select id="sort">
+          <option value="desc">Newest first</option>
+          <option value="asc">Oldest first</option>
+        </select>
+        <button class="btn" id="gridBtn" aria-pressed="true">Grid</button>
+        <button class="btn" id="masonryBtn" aria-pressed="false">Masonry</button>
+      </div>
+    </section>
+
+    <section id="gallery" class="" aria-live="polite"></section>
+  </main>
+
+  <footer>Many thanks to my friends for supporting me and occasionaly drawing me, much love!</footer>
+
+  <script defer src="javascript/app.js"></script>
+</body>
+</html>

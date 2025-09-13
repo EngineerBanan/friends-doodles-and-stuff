@@ -1,0 +1,40 @@
+{
+  "authors": [
+    { "id": "cyber",   "name": "Cybervow"},
+    { "id": "azeria", "name": "Azeria"}
+  ],
+  "drawings": [
+    { "id": "a1", "authorId": "cyber", "url": "drawings/Cyber/20250811.png", "type":"image", "date": "2025-08-11" },
+    { "id": "a2", "authorId": "cyber", "url": "drawings/Cyber/20250816.jpg", "type":"image", "date": "2025-08-16" },
+    { "id": "a3", "authorId": "cyber", "url": "drawings/Cyber/20250824.png", "type":"image", "date": "2025-08-24" },
+    { "id": "a4", "authorId": "cyber", "url": "drawings/Cyber/20250825.png", "type":"image", "date": "2025-08-25" },
+    { "id": "a5", "authorId": "cyber", "url": "drawings/Cyber/20250831.png", "type":"image", "date": "2025-08-31" },
+    { "id": "a6", "authorId": "cyber", "url": "drawings/Cyber/20250901.png", "type":"image", "date": "2025-09-01" },
+    { "id": "a7", "authorId": "cyber", "url": "drawings/Cyber/IMG_5179.jpg", "type":"image", "date": "Unknown" },
+    { "id": "a8", "authorId": "cyber", "url": "drawings/Cyber/IMG_5234.png", "type":"image", "date": "Unknown" },
+    { "id": "a9", "authorId": "cyber", "url": "drawings/Cyber/IMG_5594.png", "type":"image", "date": "Unknown" },
+    { "id": "a10", "authorId": "cyber", "url": "drawings/Cyber/IMG_5864.png", "type":"image", "date": "Unknown" },
+    { "id": "a11", "authorId": "cyber", "url": "drawings/Cyber/IMG_6144.png", "type":"image", "date": "Unknown" },
+    { "id": "a12", "authorId": "cyber", "url": "drawings/Cyber/Untitled2342.mov", "type":"video", "date": "Unknown" },
+
+    { "id": "b1", "authorId": "azeria",   "url": "drawings/Azeria/Cha(2)-06-09.png", "type":"image", "date": "2025-09-06" },
+    { "id": "b2", "authorId": "azeria",   "url": "drawings/Azeria/drawing-30-08.png", "type":"image", "date": "2025-08-30" },
+    { "id": "b3", "authorId": "azeria",   "url": "drawings/Azeria/drawing2-05-09.png", "type":"image",   "date": "2025-09-05" },
+    { "id": "b4", "authorId": "azeria",   "url": "drawings/Azeria/hm.3(1)-19-08.png",  "type":"image",  "date": "2025-08-19" },
+    { "id": "b5", "authorId": "azeria",   "url": "drawings/Azeria/KaWTH-13-09.png", "type":"image",   "date": "2025-09-13" },
+    { "id": "b6", "authorId": "azeria",   "url": "drawings/Azeria/knifegrave-07-09.png", "type":"image",   "date": "2025-09-07" },
+    { "id": "b7", "authorId": "azeria",   "url": "drawings/Azeria/Let your colors out-03-09.png", "type":"image",   "date": "2025-09-03" },
+    { "id": "b8", "authorId": "azeria",   "url": "drawings/Azeria/New Drawing-22-07.png", "type":"image",   "date": "2025-07-22" },
+    { "id": "b9", "authorId": "azeria",   "url": "drawings/Azeria/New Drawing(3)-23-07.png", "type":"image",   "date": "2025-07-23" },
+    { "id": "b10", "authorId": "azeria",   "url": "drawings/Azeria/New Drawing(6)-24-07.png", "type":"image",   "date": "2025-07-24" },
+    { "id": "b11", "authorId": "azeria",   "url": "drawings/Azeria/New Drawing(12)-25-07.png", "type":"image",   "date": "2025-07-25" },
+    { "id": "b12", "authorId": "azeria",   "url": "drawings/Azeria/New Drawing(19)-27-07.png",  "type":"image",  "date": "2025-07-27" },
+    { "id": "b13", "authorId": "azeria",   "url": "drawings/Azeria/New Drawing(23)-20-08.png",  "type":"image",  "date": "2025-08-20" },
+    { "id": "b14", "authorId": "azeria",   "url": "drawings/Azeria/New Drawing(28)-10-09.png",  "type":"image",  "date": "2025-09-10" },
+    { "id": "b15", "authorId": "azeria",   "url": "drawings/Azeria/New Drawing8-06-08.png",  "type":"image",  "date": "2025-08-06" },
+    { "id": "b16", "authorId": "azeria",   "url": "drawings/Azeria/New Drawing10(5)-27-08.png",  "type":"image",  "date": "2025-08-27" },
+    { "id": "b17", "authorId": "azeria",   "url": "drawings/Azeria/New Drawing12(3)-27-08.png",  "type":"image",  "date": "2025-08-27" },
+    { "id": "b18", "authorId": "azeria",   "url": "drawings/Azeria/New Drawing-09-09.png",  "type":"image",  "date": "2025-09-09" },
+    { "id": "b19", "authorId": "azeria",   "url": "drawings/Azeria/something(7)-13-08.png",  "type":"image",  "date": "2025-08-13" }
+  ]
+}
