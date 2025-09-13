@@ -232,22 +232,23 @@ function enableZoom(wrap, layer, onChange){
   const active=new Map(); let startDist=0, startScale=1, startX=0, startY=0, startCx=0, startCy=0;
 
   const apply = () => {
-    const rect = wrap.getBoundingClientRect();
-    const baseW = layer.clientWidth;
-    const baseH = layer.clientHeight;  
+  // on borne le déplacement par rapport à la zone visible (wrap)
+  const rect = wrap.getBoundingClientRect();
+  const viewW = rect.width, viewH = rect.height;
 
-    const lw = baseW * scale;
-    const lh = baseH * scale;
+  const contentW = viewW * scale;
+  const contentH = viewH * scale;
 
-    const maxX = Math.max(0, (lw - rect.width)  / 2);
-    const maxY = Math.max(0, (lh - rect.height) / 2);
+  const maxX = Math.max(0, (contentW - viewW) / 2);
+  const maxY = Math.max(0, (contentH - viewH) / 2);
 
-    x = Math.min(maxX, Math.max(-maxX, x));
-    y = Math.min(maxY, Math.max(-maxY, y));
+  x = Math.min(maxX, Math.max(-maxX, x));
+  y = Math.min(maxY, Math.max(-maxY, y));
 
-    layer.style.transform = `translate(${x}px, ${y}px) scale(${scale})`;
-    onChange?.(scale);
-  };
+  layer.style.transform = `translate(${x}px, ${y}px) scale(${scale})`;
+  onChange?.(scale);
+};
+
 
 
   const setScaleAt=(clientX,clientY,newScale)=>{
