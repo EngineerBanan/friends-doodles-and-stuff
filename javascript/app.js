@@ -163,13 +163,12 @@ function ensureLightbox(){
       <button class="lightbox-btn" id="lb-next" aria-label="Next">›</button>
     </div>
 
+    <!-- NEW: zoom bar -->
     <div class="lb-zoombar">
-      <button class="lightbox-btn small" id="lb-zoomin"  title="Zoom in">+</button>
       <div class="label" id="lb-zoomlabel">100%</div>
       <div class="vr-wrap">
         <input type="range" id="lb-zoomrange" min="100" max="400" step="10" value="100">
       </div>
-      <button class="lightbox-btn small" id="lb-zoomout" title="Zoom out">−</button>
       <button class="lightbox-btn small" id="lb-zoomreset" title="Reset zoom">⟲</button>
     </div>
 
@@ -231,25 +230,14 @@ function enableZoom(wrap, layer, onChange){
   let dragging=false, lastX=0, lastY=0;
   const active=new Map(); let startDist=0, startScale=1, startX=0, startY=0, startCx=0, startCy=0;
 
-  const apply = () => {
-  // on borne le déplacement par rapport à la zone visible (wrap)
-  const rect = wrap.getBoundingClientRect();
-  const viewW = rect.width, viewH = rect.height;
-
-  const contentW = viewW * scale;
-  const contentH = viewH * scale;
-
-  const maxX = Math.max(0, (contentW - viewW) / 2);
-  const maxY = Math.max(0, (contentH - viewH) / 2);
-
-  x = Math.min(maxX, Math.max(-maxX, x));
-  y = Math.min(maxY, Math.max(-maxY, y));
-
-  layer.style.transform = `translate(${x}px, ${y}px) scale(${scale})`;
-  onChange?.(scale);
-};
-
-
+  const apply=()=>{ 
+    const rect=wrap.getBoundingClientRect();
+    const lw=layer.scrollWidth*scale, lh=layer.scrollHeight*scale;
+    const maxX=Math.max(0,(lw-rect.width)/2+80), maxY=Math.max(0,(lh-rect.height)/2+80);
+    x=Math.min(maxX,Math.max(-maxX,x)); y=Math.min(maxY,Math.max(-maxY,y));
+    layer.style.transform=`translate(${x}px, ${y}px) scale(${scale})`;
+    onChange?.(scale);
+  };
 
   const setScaleAt=(clientX,clientY,newScale)=>{
     const prev=scale; newScale=Math.min(max,Math.max(min,newScale));
@@ -303,29 +291,19 @@ function showLightboxIndex(idx){
     if (item.poster) node.setAttribute('poster', item.poster);
     node.controls = true;
     node.playsInline = true;
-    node.draggable = false;
   } else {
     node = new Image();
     node.alt = 'Drawing';
     node.src = item.url;
-    node.draggable = false;
   }
-
 
   layer.appendChild(node);
   wrap.appendChild(layer);
   lbMedia.appendChild(wrap);
 
-  if (typeof lightbox.updateInfo === 'function') {
-    lightbox.updateInfo(item);
-  }
-
-
   const range  = lightbox.querySelector('#lb-zoomrange');
   const label  = lightbox.querySelector('#lb-zoomlabel');
   const resetB = lightbox.querySelector('#lb-zoomreset');
-  const plusB  = lightbox.querySelector('#lb-zoomin');
-  const minusB = lightbox.querySelector('#lb-zoomout');
 
   const zoom = enableZoom(wrap, layer, (s)=>{
     const pct = Math.round(s * 100);
@@ -333,32 +311,17 @@ function showLightboxIndex(idx){
     if (label) label.textContent = pct + '%';
   });
 
-  function setPct(p){
-    const clamped = Math.max(100, Math.min(400, p|0));
-    if (range) range.value = clamped;
-    if (label) label.textContent = clamped + '%';
-    zoom.setScaleCentered(clamped / 100);
+  if (range) {
+    range.value = 100;
+    range.oninput = () => {
+      const s = Math.max(100, Math.min(400, parseInt(range.value,10) || 100)) / 100;
+      zoom.setScaleCentered(s);
+    };
   }
+  if (label) label.textContent = '100%';
+  if (resetB) resetB.onclick = () => { zoom.reset(); if (range) range.value = 100; if (label) label.textContent = '100%'; };
 
-  if (range){
-    setPct(100);
-    range.oninput = () => setPct(parseInt(range.value, 10) || 100);
-  }
-  if (plusB)  plusB.onclick  = () => setPct((parseInt(range.value,10)||100) + 10);
-  if (minusB) minusB.onclick = () => setPct((parseInt(range.value,10)||100) - 10);
-  if (resetB) resetB.onclick = () => setPct(100);
-
-  // optional: keyboard zoom when lightbox open
-  // clavier zoom: ajouté une seule fois
-  if (!lightbox._zoomKeys) {
-    lightbox._zoomKeys = true;
-    window.addEventListener('keydown', (e)=>{
-      if(!lightbox.classList.contains('open')) return;
-      if(e.key === '+' || e.key === '=') { e.preventDefault(); plusB?.click(); }
-      if(e.key === '-' || e.key === '_') { e.preventDefault(); minusB?.click(); }
-      if(e.key === '0')                   { e.preventDefault(); resetB?.click(); }
-    });
-  }
+  if (typeof lightbox.updateInfo === 'function') lightbox.updateInfo(item);
 }
 
 
@@ -370,10 +333,13 @@ async function boot(){
     const data = await res.json();
     state.authors = data.authors || [];
     state.drawings = (data.drawings || []).map(d => ({
-    id: d.id, authorId: d.authorId, url: d.url, date: d.date,
-    type: d.type || 'image', poster: d.poster || null
+    id: d.id,
+    authorId: d.authorId,
+    url: d.url,
+    date: d.date,
+    type: d.type || 'image',
+    poster: d.poster || null
   }));
-
 
     const url = new URL(location);
     const pAuthor = url.searchParams.get('author');
