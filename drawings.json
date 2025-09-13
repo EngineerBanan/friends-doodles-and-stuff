@@ -35,6 +35,7 @@
     { "id": "b16", "authorId": "azeria",   "url": "drawings/Azeria/NewDrawing10(5)-27-08.png",  "type":"image",  "date": "2025-08-27" },
     { "id": "b17", "authorId": "azeria",   "url": "drawings/Azeria/NewDrawing12(3)-27-08.png",  "type":"image",  "date": "2025-08-27" },
     { "id": "b18", "authorId": "azeria",   "url": "drawings/Azeria/NewDrawing-09-09.png",  "type":"image",  "date": "2025-09-09" },
-    { "id": "b19", "authorId": "azeria",   "url": "drawings/Azeria/something(7)-13-08.png",  "type":"image",  "date": "2025-08-13" }
+    { "id": "b19", "authorId": "azeria",   "url": "drawings/Azeria/something(7)-13-08.png",  "type":"image",  "date": "2025-08-13" },
+    { "id": "b19", "authorId": "azeria",   "url": "drawings/Azeria/kristener_maybe_lol.png",  "type":"image",  "date": "2025-09-13" }
   ]
 }
