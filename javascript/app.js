@@ -93,16 +93,21 @@ function renderGallery(){
     // --- média (image par défaut si type absent) ---
     let media;
     if (d.type === 'video') {
-      media = document.createElement('video');
-      media.src = d.url;
-      media.controls = true;
-      media.playsInline = true;
-    } else {
-      media = new Image();
-      media.src = d.url;
-      media.alt = 'Drawing';
-      media.loading = 'lazy';
-    }
+    media = document.createElement('video');
+    media.src = d.url;
+    if (d.poster) media.setAttribute('poster', d.poster);
+    media.muted = true;      // requis pour autoplay
+    media.autoplay = true;   // preview qui tourne
+    media.loop = true;
+    media.playsInline = true;
+    media.preload = 'metadata';
+    media.controls = false;  // pas de contrôles dans la grille
+  } else {
+    media = new Image();
+    media.src = d.url;
+    media.alt = 'Drawing';
+    media.loading = 'lazy';
+  }
 
     // --- badge date ---
     const badge = el('div','badge');
@@ -147,18 +152,28 @@ function ensureLightbox(){
   lightbox.setAttribute('role','dialog');
   lightbox.setAttribute('aria-modal','true');
   lightbox.innerHTML = `
-    <div class="lightbox-inner" id="lb-inner">
-      <div class="lightbox-top">
-        <div id="lb-info"></div>
-        <button class="lightbox-btn lightbox-close" id="lb-close" aria-label="Close">✕</button>
-      </div>
-      <div class="lightbox-media" id="lb-media"></div>
-      <div class="lightbox-actions">
-        <button class="lightbox-btn" id="lb-prev" aria-label="Previous">‹</button>
-        <button class="lightbox-btn" id="lb-next" aria-label="Next">›</button>
-      </div>
-      <div class="lightbox-footer" id="lb-footer"></div>
+  <div class="lightbox-inner" id="lb-inner">
+    <div class="lightbox-top">
+      <div id="lb-info"></div>
+      <button class="lightbox-btn lightbox-close" id="lb-close" aria-label="Close">✕</button>
     </div>
+    <div class="lightbox-media" id="lb-media"></div>
+    <div class="lightbox-actions">
+      <button class="lightbox-btn" id="lb-prev" aria-label="Previous">‹</button>
+      <button class="lightbox-btn" id="lb-next" aria-label="Next">›</button>
+    </div>
+
+    <!-- NEW: zoom bar -->
+    <div class="lb-zoombar">
+      <div class="label" id="lb-zoomlabel">100%</div>
+      <div class="vr-wrap">
+        <input type="range" id="lb-zoomrange" min="100" max="400" step="10" value="100">
+      </div>
+      <button class="lightbox-btn small" id="lb-zoomreset" title="Reset zoom">⟲</button>
+    </div>
+
+    <div class="lightbox-footer" id="lb-footer"></div>
+  </div>
   `;
   document.body.appendChild(lightbox);
 
@@ -210,135 +225,105 @@ function closeLightbox(){
   lbList = [];
 }
 
-function enableZoom(wrap, layer){
-  let scale = 1, min = 1, max = 4, x = 0, y = 0;
-  let dragging = false, lastX = 0, lastY = 0;
+function enableZoom(wrap, layer, onChange){
+  let scale=1, min=1, max=4, x=0, y=0;
+  let dragging=false, lastX=0, lastY=0;
+  const active=new Map(); let startDist=0, startScale=1, startX=0, startY=0, startCx=0, startCy=0;
 
-  const active = new Map(); // for pinch
-  let startDist = 0, startScale = 1, startX = 0, startY = 0, startCx = 0, startCy = 0;
-
-  const apply = () => {
-    // clamp to keep content roughly in view
-    const rect = wrap.getBoundingClientRect();
-    const lw = layer.scrollWidth * scale;
-    const lh = layer.scrollHeight * scale;
-    const maxX = Math.max(0, (lw - rect.width) / 2 + 80);
-    const maxY = Math.max(0, (lh - rect.height) / 2 + 80);
-    x = Math.min(maxX, Math.max(-maxX, x));
-    y = Math.min(maxY, Math.max(-maxY, y));
-    layer.style.transform = `translate(${x}px, ${y}px) scale(${scale})`;
+  const apply=()=>{ 
+    const rect=wrap.getBoundingClientRect();
+    const lw=layer.scrollWidth*scale, lh=layer.scrollHeight*scale;
+    const maxX=Math.max(0,(lw-rect.width)/2+80), maxY=Math.max(0,(lh-rect.height)/2+80);
+    x=Math.min(maxX,Math.max(-maxX,x)); y=Math.min(maxY,Math.max(-maxY,y));
+    layer.style.transform=`translate(${x}px, ${y}px) scale(${scale})`;
+    onChange?.(scale);
   };
 
-  const zoomAt = (clientX, clientY, factor) => {
-    const r = layer.getBoundingClientRect();
-    const cx = clientX - r.left, cy = clientY - r.top;
-    const prev = scale;
-    scale = Math.min(max, Math.max(min, scale * factor));
-    // keep cursor point stable
-    x = cx - (cx - x) * (scale / prev);
-    y = cy - (cy - y) * (scale / prev);
-    if (scale === 1) { x = 0; y = 0; }
+  const setScaleAt=(clientX,clientY,newScale)=>{
+    const prev=scale; newScale=Math.min(max,Math.max(min,newScale));
+    const r=layer.getBoundingClientRect();
+    const cx=clientX-r.left, cy=clientY-r.top;
+    scale=newScale; const f=scale/prev;
+    x = cx - (cx - x)*f; y = cy - (cy - y)*f;
+    if(scale===1){ x=0; y=0; }
     apply();
   };
 
-  // Wheel zoom
-  wrap.addEventListener('wheel', e => {
-    e.preventDefault();
-    const factor = e.deltaY < 0 ? 1.12 : 1/1.12;
-    zoomAt(e.clientX, e.clientY, factor);
-  }, { passive:false });
+  wrap.addEventListener('wheel', e=>{ e.preventDefault(); setScaleAt(e.clientX,e.clientY, scale * (e.deltaY<0?1.12:1/1.12)); }, {passive:false});
+  wrap.addEventListener('dblclick', e=>{ e.preventDefault(); setScaleAt(e.clientX,e.clientY, scale>1?1:2); });
 
-  // Double click/tap toggle 1x/2x
-  wrap.addEventListener('dblclick', e => {
-    e.preventDefault();
-    const targetScale = scale > 1 ? 1 : 2;
-    const factor = targetScale / scale;
-    zoomAt(e.clientX, e.clientY, factor);
+  wrap.addEventListener('pointerdown', e=>{ wrap.setPointerCapture(e.pointerId); dragging=true; lastX=e.clientX; lastY=e.clientY; wrap.classList.add('dragging'); active.set(e.pointerId,{x:e.clientX,y:e.clientY}); if(active.size===2){ const pts=[...active.values()]; startDist=Math.hypot(pts[0].x-pts[1].x, pts[0].y-pts[1].y); startScale=scale; startX=x; startY=y; startCx=(pts[0].x+pts[1].x)/2; startCy=(pts[0].y+pts[1].y)/2; }});
+  wrap.addEventListener('pointermove', e=>{ const a=active.get(e.pointerId); if(a){ a.x=e.clientX; a.y=e.clientY; }
+    if(active.size===2){ const pts=[...active.values()]; const dist=Math.hypot(pts[0].x-pts[1].x, pts[0].y-pts[1].y);
+      if(startDist>0){ const f=dist/startDist; setScaleAt(startCx,startCy,startScale*f); } return; }
+    if(dragging && scale>1){ const dx=e.clientX-lastX, dy=e.clientY-lastY; lastX=e.clientX; lastY=e.clientY; x+=dx; y+=dy; apply(); }
   });
+  const up= e=>{ active.delete(e.pointerId); dragging=false; wrap.classList.remove('dragging'); if(active.size<2){ startDist=0; } };
+  wrap.addEventListener('pointerup', up); wrap.addEventListener('pointercancel', up);
 
-  // Drag to pan (when zoomed)
-  wrap.addEventListener('pointerdown', e => {
-    wrap.setPointerCapture(e.pointerId);
-    dragging = true; lastX = e.clientX; lastY = e.clientY;
-    wrap.classList.add('dragging');
-    active.set(e.pointerId, {x:e.clientX, y:e.clientY});
-    // pinch start
-    if (active.size === 2){
-      const pts = [...active.values()];
-      startDist = Math.hypot(pts[0].x-pts[1].x, pts[0].y-pts[1].y);
-      startScale = scale; startX = x; startY = y;
-      startCx = (pts[0].x + pts[1].x)/2; startCy = (pts[0].y + pts[1].y)/2;
-    }
-  });
-
-  wrap.addEventListener('pointermove', e => {
-    const a = active.get(e.pointerId);
-    if (a){ a.x = e.clientX; a.y = e.clientY; }
-
-    // pinch
-    if (active.size === 2){
-      const pts = [...active.values()];
-      const dist = Math.hypot(pts[0].x-pts[1].x, pts[0].y-pts[1].y);
-      if (startDist > 0){
-        scale = Math.min(max, Math.max(min, startScale * (dist / startDist)));
-        // keep pinch center stable
-        const factor = scale / startScale;
-        x = startCx - (startCx - startX) * factor;
-        y = startCy - (startCy - startY) * factor;
-        apply();
-      }
-      return;
-    }
-
-    // pan
-    if (dragging && scale > 1){
-      const dx = e.clientX - lastX;
-      const dy = e.clientY - lastY;
-      lastX = e.clientX; lastY = e.clientY;
-      x += dx; y += dy;
-      apply();
-    }
-  });
-
-  wrap.addEventListener('pointerup', e => {
-    active.delete(e.pointerId);
-    dragging = false; wrap.classList.remove('dragging');
-    if (active.size < 2){ startDist = 0; }
-  });
-  wrap.addEventListener('pointercancel', e => {
-    active.delete(e.pointerId);
-    dragging = false; wrap.classList.remove('dragging');
-    if (active.size < 2){ startDist = 0; }
-  });
+  return {
+    reset(){ scale=1; x=0; y=0; apply(); },
+    setScaleCentered(newScale){ // centre de la zone média
+      const r=wrap.getBoundingClientRect(); setScaleAt(r.left+r.width/2, r.top+r.height/2, newScale);
+    },
+    getScale(){ return scale; }
+  };
 }
 
+
 function showLightboxIndex(idx){
+  if (!lbList.length) return;
+
+  if (idx < 0) idx = lbList.length - 1;
+  if (idx >= lbList.length) idx = 0;
+  lbIndex = idx;
+
+  const item = lbList[lbIndex];
   lbMedia.innerHTML = '';
-  
-  const wrap = document.createElement('div');
-  wrap.className = 'lb-zoom';
-  const layer = document.createElement('div');
-  layer.className = 'lb-zoom-layer';
+
+  const wrap  = document.createElement('div'); wrap.className = 'lb-zoom';
+  const layer = document.createElement('div'); layer.className = 'lb-zoom-layer';
 
   let node;
   if (item.type === 'video') {
     node = document.createElement('video');
     node.src = item.url;
+    if (item.poster) node.setAttribute('poster', item.poster);
     node.controls = true;
     node.playsInline = true;
-    // autoplay/loop/muted à ta guise
   } else {
     node = new Image();
     node.alt = 'Drawing';
     node.src = item.url;
   }
+
   layer.appendChild(node);
   wrap.appendChild(layer);
   lbMedia.appendChild(wrap);
 
-  // activate zoom/pan
-  enableZoom(wrap, layer);
+  const range  = lightbox.querySelector('#lb-zoomrange');
+  const label  = lightbox.querySelector('#lb-zoomlabel');
+  const resetB = lightbox.querySelector('#lb-zoomreset');
+
+  const zoom = enableZoom(wrap, layer, (s)=>{
+    const pct = Math.round(s * 100);
+    if (range) range.value = pct;
+    if (label) label.textContent = pct + '%';
+  });
+
+  if (range) {
+    range.value = 100;
+    range.oninput = () => {
+      const s = Math.max(100, Math.min(400, parseInt(range.value,10) || 100)) / 100;
+      zoom.setScaleCentered(s);
+    };
+  }
+  if (label) label.textContent = '100%';
+  if (resetB) resetB.onclick = () => { zoom.reset(); if (range) range.value = 100; if (label) label.textContent = '100%'; };
+
+  if (typeof lightbox.updateInfo === 'function') lightbox.updateInfo(item);
 }
+
 
 
 async function boot(){
@@ -347,16 +332,21 @@ async function boot(){
     if(!res.ok) throw new Error('Failed to load drawings.json');
     const data = await res.json();
     state.authors = data.authors || [];
-    state.drawings = (data.drawings || []).map(d=>({ id:d.id, authorId:d.authorId, url:d.url, date:d.date }));
+    state.drawings = (data.drawings || []).map(d => ({
+    id: d.id,
+    authorId: d.authorId,
+    url: d.url,
+    date: d.date,
+    type: d.type || 'image',
+    poster: d.poster || null
+  }));
 
-    // URL params
     const url = new URL(location);
     const pAuthor = url.searchParams.get('author');
     const pSort = url.searchParams.get('sort');
     if(pAuthor && (pAuthor==='all' || state.authors.some(a=>a.id===pAuthor))) state.currentAuthorId = pAuthor;
     if(pSort && (pSort==='asc' || pSort==='desc')) state.sort = pSort;
 
-    // reflect in UI
     qs('#sort').value = state.sort;
     setPressed(qs('#gridBtn'), state.view==='grid');
     setPressed(qs('#masonryBtn'), state.view==='masonry');

@@ -15,7 +15,7 @@
     { "id": "a9", "authorId": "cyber", "url": "drawings/Cyber/IMG_5594.png", "type":"image", "date": "Unknown" },
     { "id": "a10", "authorId": "cyber", "url": "drawings/Cyber/IMG_5864.png", "type":"image", "date": "Unknown" },
     { "id": "a11", "authorId": "cyber", "url": "drawings/Cyber/IMG_6144.png", "type":"image", "date": "Unknown" },
-    { "id": "a12", "authorId": "cyber", "url": "drawings/Cyber/Untitled2342.mov", "type":"video", "date": "Unknown" },
+    { "id": "a12", "authorId": "cyber", "url": "drawings/Cyber/Untitled2342.mp4", "type":"video", "date": "Unknown" },
 
     { "id": "b1", "authorId": "azeria",   "url": "drawings/Azeria/Cha(2)-06-09.png", "type":"image", "date": "2025-09-06" },
     { "id": "b2", "authorId": "azeria",   "url": "drawings/Azeria/drawing-30-08.png", "type":"image", "date": "2025-08-30" },
