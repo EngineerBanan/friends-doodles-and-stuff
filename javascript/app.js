@@ -81,14 +81,17 @@ function getFilteredSorted(){
 
 function renderGallery(){
   const mount = qs('#gallery');
+  // active/désactive le mode masonry (le CSS s'occupe du layout en colonnes)
   mount.className = state.view === 'masonry' ? 'masonry' : '';
+
   const grid = el('div','grid');
-  const list = getFilteredSorted();
+  const list = getFilteredSorted(); // déjà existant
 
-  for(const d of list){
+  list.forEach((d, idx) => {
     const card = el('article','card');
-    let media;
 
+    // --- média (image par défaut si type absent) ---
+    let media;
     if (d.type === 'video') {
       media = document.createElement('video');
       media.src = d.url;
@@ -101,21 +104,28 @@ function renderGallery(){
       media.loading = 'lazy';
     }
 
+    // --- badge date ---
     const badge = el('div','badge');
     badge.textContent = fmtDate(d.date) || '';
+
     card.append(media, badge);
     grid.append(card);
 
-    const io = new IntersectionObserver((entries, obs)=>{
-      for(const e of entries){
-        if(e.isIntersecting){ e.target.classList.add('visible'); obs.unobserve(e.target); }
+    // --- fade-in au scroll ---
+    const io = new IntersectionObserver((entries, obs) => {
+      for (const e of entries) {
+        if (e.isIntersecting) { e.target.classList.add('visible'); obs.unobserve(e.target); }
       }
-    }, {rootMargin:'40px'});
+    }, { rootMargin: '40px' });
     io.observe(card);
-  }
+
+    // --- ouverture lightbox au clic ---
+    card.addEventListener('click', () => openLightbox(idx, list));
+  });
 
   mount.replaceChildren(grid);
 }
+
 
 function wireControls(){
   const gridBtn = qs('#gridBtn');
@@ -126,6 +136,108 @@ function wireControls(){
   masonryBtn.addEventListener('click', ()=>{ state.view='masonry'; setPressed(gridBtn,false); setPressed(masonryBtn,true); renderGallery(); });
   sortSel.addEventListener('change', async ()=>{ state.sort = sortSel.value; setQuery(state.currentAuthorId, state.sort); await animateSwitch(); renderGallery(); });
 }
+
+let lightbox, lbMedia, lbDate, lbAuthor, lbIndex = 0, lbList = [];
+
+function ensureLightbox(){
+  if (lightbox) return;
+
+  lightbox = document.createElement('div');
+  lightbox.className = 'lightbox';
+  lightbox.setAttribute('role','dialog');
+  lightbox.setAttribute('aria-modal','true');
+  lightbox.innerHTML = `
+    <div class="lightbox-inner" id="lb-inner">
+      <div class="lightbox-top">
+        <div id="lb-info"></div>
+        <button class="lightbox-btn lightbox-close" id="lb-close" aria-label="Close">✕</button>
+      </div>
+      <div class="lightbox-media" id="lb-media"></div>
+      <div class="lightbox-actions">
+        <button class="lightbox-btn" id="lb-prev" aria-label="Previous">‹</button>
+        <button class="lightbox-btn" id="lb-next" aria-label="Next">›</button>
+      </div>
+      <div class="lightbox-footer" id="lb-footer"></div>
+    </div>
+  `;
+  document.body.appendChild(lightbox);
+
+  lbMedia  = lightbox.querySelector('#lb-media');
+  const lbInfo   = lightbox.querySelector('#lb-info');
+  const lbFooter = lightbox.querySelector('#lb-footer');
+
+  // petites helpers
+  lbDate   = (d)=> (new Date(d).toLocaleDateString('en-US',{year:'numeric',month:'short',day:'2-digit'}));
+  lbAuthor = (id)=> (state.authors.find(a=>a.id===id)?.name ?? 'Unknown');
+
+  // Click background to close
+  lightbox.addEventListener('click', (e)=>{
+    if(e.target === lightbox) closeLightbox();
+  });
+  // Close button
+  lightbox.querySelector('#lb-close').addEventListener('click', closeLightbox);
+  // Prev/Next
+  lightbox.querySelector('#lb-prev').addEventListener('click', ()=> showLightboxIndex(lbIndex-1));
+  lightbox.querySelector('#lb-next').addEventListener('click', ()=> showLightboxIndex(lbIndex+1));
+  // Keyboard
+  window.addEventListener('keydown', (e)=>{
+    if(!lightbox.classList.contains('open')) return;
+    if(e.key === 'Escape') closeLightbox();
+    else if(e.key === 'ArrowLeft') showLightboxIndex(lbIndex-1);
+    else if(e.key === 'ArrowRight') showLightboxIndex(lbIndex+1);
+  });
+
+  // expose pour mise à jour d'infos
+  lightbox.updateInfo = (item)=>{
+    lbInfo.textContent = `${lbAuthor(item.authorId)} — ${lbDate(item.date) || ''}`;
+    lbFooter.textContent = 'Use ◀ ▶ or click to navigate — Esc to close';
+  };
+}
+
+function openLightbox(index, list){
+  ensureLightbox();
+  lbList  = list;
+  lbIndex = index;
+  document.body.style.overflow = 'hidden';   // freeze scroll
+  lightbox.classList.add('open');
+  showLightboxIndex(lbIndex);
+}
+
+function closeLightbox(){
+  if(!lightbox) return;
+  lightbox.classList.remove('open');
+  document.body.style.overflow = '';
+  lbList = [];
+}
+
+function showLightboxIndex(idx){
+  if(!lbList.length) return;
+  // wrap
+  if(idx < 0) idx = lbList.length - 1;
+  if(idx >= lbList.length) idx = 0;
+  lbIndex = idx;
+
+  const item = lbList[lbIndex];
+  lbMedia.innerHTML = '';
+
+  if(item.type === 'video'){
+    const v = document.createElement('video');
+    v.src = item.url;
+    v.controls = true;
+    v.playsInline = true;
+    v.autoplay = true;
+    v.loop = true;
+    v.muted = true;
+    lbMedia.appendChild(v);
+  }else{
+    const img = new Image();
+    img.alt = 'Drawing';
+    img.src = item.url;
+    lbMedia.appendChild(img);
+  }
+  lightbox.updateInfo(item);
+}
+
 
 async function boot(){
   try{

@@ -46,7 +46,91 @@
     .badge{ position:absolute; top:8px; left:8px; padding:6px 8px; font-size:11px; letter-spacing:.2px; border-radius:999px; background:rgba(0,0,0,.55); border:1px solid rgba(255,255,255,.08) }
 
     /* Masonry alt view */
-    .masonry .grid{grid-auto-rows:10px}
-    .masonry .card img{aspect-ratio:auto}
+    /* --- Masonry via CSS columns (au lieu de grid-auto-rows) --- */
+    .masonry .grid{
+      display:block;
+      column-gap: var(--gap);
+      column-fill: balance;
+      column-count: 1;
+    }
+    @media (min-width: 640px){ .masonry .grid{ column-count: 2; } }
+    @media (min-width: 980px){ .masonry .grid{ column-count: 3; } }
+
+    .masonry .card{
+      break-inside: avoid;
+      margin: 0 0 var(--gap);
+    }
+
+    .masonry .card img,
+    .masonry .card video{
+      width: 100%;
+      height: auto;
+      aspect-ratio: auto;
+      object-fit: contain;
+    }
+
+    /* --- Lightbox --- */
+    .lightbox {
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,.75);
+      backdrop-filter: blur(2px);
+      display: none; /* devient flex quand ouvert */
+      align-items: center; justify-content: center;
+      z-index: 9999;
+    }
+    .lightbox.open { display: flex; }
+
+    .lightbox-inner{
+      position: relative;
+      max-width: min(96vw, 1200px);
+      max-height: 92vh;
+      background: #0e1117;
+      border: 1px solid var(--ring);
+      border-radius: var(--radius);
+      box-shadow: 0 20px 60px rgba(0,0,0,.6);
+      padding: 12px;
+      display: flex; flex-direction: column; gap: 10px;
+    }
+
+    .lightbox-media{
+      display: flex; align-items: center; justify-content: center;
+      min-width: 60vw; min-height: 40vh;
+      max-width: 90vw; max-height: 76vh;
+    }
+    .lightbox-media img,
+    .lightbox-media video{
+      max-width: 100%;
+      max-height: 100%;
+      border-radius: 12px;
+      background: #0b0d12;
+    }
+
+    .lightbox-top{
+      display:flex; align-items:center; justify-content:space-between;
+      gap: 10px; color: var(--muted); font-size: 14px;
+    }
+
+    .lightbox-actions{
+      position: absolute; inset: 0;
+      display: flex; align-items: center; justify-content: space-between;
+      pointer-events: none;
+    }
+    .lightbox-btn{
+      pointer-events: all;
+      background: rgba(0,0,0,.45);
+      border: 1px solid rgba(255,255,255,.1);
+      color: var(--ink);
+      width: 44px; height: 44px; border-radius: 999px;
+      display: grid; place-items: center; cursor: pointer;
+      transition: transform .12s ease, background .12s ease;
+    }
+    .lightbox-btn:hover{ transform: scale(1.05); background: rgba(0,0,0,.6); }
+    .lightbox-close{
+      position:absolute; top:8px; right:8px;
+    }
+
+    .lightbox-footer{
+      text-align:center; color: var(--muted); font-size: 13px;
+    }
 
     footer{color:var(--muted); font-size:13px; text-align:center; padding:26px 0 40px}
