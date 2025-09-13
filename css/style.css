@@ -68,7 +68,7 @@
       aspect-ratio: auto;
       object-fit: contain;
     }
-
+    
     /* --- Lightbox (fix overflow) --- */
     .lightbox {
       position: fixed; inset: 0;
@@ -141,9 +141,3 @@
 
 
     footer{color:var(--muted); font-size:13px; text-align:center; padding:26px 0 40px}
-
-    /* zoom/pan helpers */
-    .lb-zoom{ touch-action: none; cursor: grab; }
-    .lb-zoom.dragging{ cursor: grabbing; }
-    .lb-zoom-layer{ transform-origin: 0 0; will-change: transform; }
-    .lb-zoom img{ user-select:none; -webkit-user-drag:none; }
