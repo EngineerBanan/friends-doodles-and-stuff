@@ -142,17 +142,52 @@
 
     footer{color:var(--muted); font-size:13px; text-align:center; padding:26px 0 40px}
 
+    /* Zoom / pan helpers */
     .lb-zoom{ touch-action:none; cursor:grab; }
     .lb-zoom.dragging{ cursor:grabbing; }
     .lb-zoom-layer{ transform-origin:0 0; will-change:transform; }
     .lb-zoom img{ user-select:none; -webkit-user-drag:none; }
 
+    /* Right-side zoom panel (visible & comfy) */
     .lb-zoombar{
-      position:absolute; right:12px; top:64px; bottom:64px;
-      display:flex; flex-direction:column; align-items:center; justify-content:center;
-      gap:10px; pointer-events:all;
+      position:absolute; right:16px; top:50%; transform:translateY(-50%);
+      display:flex; flex-direction:column; align-items:center; gap:10px;
+      background: rgba(0,0,0,.55);
+      border:1px solid rgba(255,255,255,.12);
+      border-radius:16px;
+      padding:10px;
+      z-index:2;
     }
-    .lb-zoombar .vr-wrap{ width:220px; height:32px; transform:rotate(-90deg); }
-    .lb-zoombar input[type=range]{ width:100%; }
-    .lb-zoombar .label{ font-size:12px; color:var(--muted); transform:rotate(90deg); }
+    /* label */
+    .lb-zoombar .label{
+      font-size:12px; font-weight:700; color:var(--ink);
+    }
+
+    /* vertical range – works in Firefox & WebKit */
+    .lb-zoombar input[type=range]{
+      writing-mode: bt-lr;
+      height: 240px; width: 26px; padding:0; margin:0;
+      background: transparent;
+    }
+    .lb-zoombar input[type=range]::-webkit-slider-runnable-track{
+      width: 6px; background: linear-gradient(#7c8597,#c3cad7);
+      border-radius: 999px;
+    }
+    .lb-zoombar input[type=range]::-webkit-slider-thumb{
+      -webkit-appearance:none;
+      width: 20px; height: 20px; border-radius:50%;
+      background: #e8ecf4; border: 2px solid #0003;
+      margin-top: -7px;
+    }
+    .lb-zoombar input[type=range]::-moz-range-track{
+      width: 6px; background: linear-gradient(#7c8597,#c3cad7);
+      border-radius: 999px;
+    }
+    .lb-zoombar input[type=range]::-moz-range-thumb{
+      width: 20px; height: 20px; border-radius:50%;
+      background: #e8ecf4; border: 2px solid #0003;
+    }
+
+    /* tiny buttons on the panel */
     .lightbox-btn.small{ width:36px; height:36px; font-size:16px; }
+
