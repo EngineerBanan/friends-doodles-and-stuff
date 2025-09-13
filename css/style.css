@@ -143,9 +143,8 @@
     footer{color:var(--muted); font-size:13px; text-align:center; padding:26px 0 40px}
 
     /* Zoom / pan helpers */
-    .lb-zoom{ touch-action:none; cursor:grab; }
+    .lb-zoom, .lb-zoom-layer{ max-width: 100%; max-height: 100%; }
     .lb-zoom.dragging{ cursor:grabbing; }
-    .lb-zoom-layer{ transform-origin:0 0; will-change:transform; }
     .lb-zoom img{ user-select:none; -webkit-user-drag:none; }
 
     /* Right-side zoom panel (visible & comfy) */
@@ -154,16 +153,15 @@
       display:flex; flex-direction:column; align-items:center; gap:10px;
       background: rgba(0,0,0,.55);
       border:1px solid rgba(255,255,255,.12);
-      border-radius:16px;
-      padding:10px;
-      z-index:2;
+      border-radius:16px; padding:10px; z-index:2;
     }
-    /* label */
-    .lb-zoombar .label{
-      font-size:12px; font-weight:700; color:var(--ink);
+    .lb-zoombar .label{ font-size:12px; font-weight:700; color:var(--ink); }
+
+    .lb-zoombar .vr-wrap{
+      width: 260px; height: 32px;
+      transform: rotate(-90deg);
     }
 
-    /* vertical range – works in Firefox & WebKit */
     .lb-zoombar input[type=range]{
       writing-mode: bt-lr;
       height: 240px; width: 26px; padding:0; margin:0;

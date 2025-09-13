@@ -166,11 +166,12 @@ function ensureLightbox(){
     <div class="lb-zoombar">
       <button class="lightbox-btn small" id="lb-zoomin"  title="Zoom in">+</button>
       <div class="label" id="lb-zoomlabel">100%</div>
-      <input type="range" id="lb-zoomrange" min="100" max="400" step="10" value="100">
+      <div class="vr-wrap">
+        <input type="range" id="lb-zoomrange" min="100" max="400" step="10" value="100">
+      </div>
       <button class="lightbox-btn small" id="lb-zoomout" title="Zoom out">−</button>
       <button class="lightbox-btn small" id="lb-zoomreset" title="Reset zoom">⟲</button>
     </div>
-
 
     <div class="lightbox-footer" id="lb-footer"></div>
   </div>
@@ -230,14 +231,24 @@ function enableZoom(wrap, layer, onChange){
   let dragging=false, lastX=0, lastY=0;
   const active=new Map(); let startDist=0, startScale=1, startX=0, startY=0, startCx=0, startCy=0;
 
-  const apply=()=>{ 
-    const rect=wrap.getBoundingClientRect();
-    const lw=layer.scrollWidth*scale, lh=layer.scrollHeight*scale;
-    const maxX=Math.max(0,(lw-rect.width)/2+80), maxY=Math.max(0,(lh-rect.height)/2+80);
-    x=Math.min(maxX,Math.max(-maxX,x)); y=Math.min(maxY,Math.max(-maxY,y));
-    layer.style.transform=`translate(${x}px, ${y}px) scale(${scale})`;
+  const apply = () => {
+    const rect = wrap.getBoundingClientRect();
+    const baseW = layer.clientWidth;
+    const baseH = layer.clientHeight;  
+
+    const lw = baseW * scale;
+    const lh = baseH * scale;
+
+    const maxX = Math.max(0, (lw - rect.width)  / 2);
+    const maxY = Math.max(0, (lh - rect.height) / 2);
+
+    x = Math.min(maxX, Math.max(-maxX, x));
+    y = Math.min(maxY, Math.max(-maxY, y));
+
+    layer.style.transform = `translate(${x}px, ${y}px) scale(${scale})`;
     onChange?.(scale);
   };
+
 
   const setScaleAt=(clientX,clientY,newScale)=>{
     const prev=scale; newScale=Math.min(max,Math.max(min,newScale));
