@@ -73,19 +73,27 @@ label{color:var(--muted); font-size:13px}
 }
 .lightbox-top{ display:flex; align-items:center; justify-content:space-between; gap:10px; color:var(--muted); font-size:14px }
 
-/* ⬇️ patch: on force le média à occuper TOUT l’espace disponible,
-   puis on le CONTAIN pour éviter tout dépassement/cropping */
+
 .lightbox-media{
-  flex:1 1 auto; min-height:0; min-width:0;
-  display:grid; place-items:center; overflow:hidden;
+  flex: 1 1 auto;
+  min-height: 0; min-width: 0;
+  display: flex;               
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
 }
+
 .lightbox-media img,
 .lightbox-media video{
-  width: 100% !important;
-  height: 100% !important;
-  object-fit: contain !important;   /* jamais rogné, jamais “zoomé” */
-  border-radius:12px; background:#0b0d12;
+  width: auto; 
+  height: auto;  
+  max-width: 100%; 
+  max-height: 100%; 
+  object-fit: contain; 
+  border-radius: 12px;
+  background: #0b0d12;
 }
+
 
 .lightbox-actions{ position:absolute; inset:0; display:flex; align-items:center; justify-content:space-between; pointer-events:none }
 .lightbox-btn{ pointer-events:all; background:rgba(0,0,0,.45); border:1px solid rgba(255,255,255,.1); color:var(--ink);
