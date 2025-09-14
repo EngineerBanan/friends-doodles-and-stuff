@@ -5,8 +5,10 @@ const state = {
   drawings: [],
   currentAuthorId: 'all',
   view: 'grid', // 'grid' | 'masonry'
-  sort: 'desc'  // 'asc' | 'desc' (by date)
+  sort: 'desc', // 'asc' | 'desc' (by date)
+  sortType: 'all' // 'all' | 'image' | 'gif' | 'video'
 };
+
 
 // Helpers
 const qs = s => document.querySelector(s);
@@ -19,12 +21,14 @@ const fmtDate = iso => {
   return d.toLocaleDateString('en-US', { year:'numeric', month:'short', day:'2-digit' });
 };
 
-function setQuery(authorId, sort){
+function setQuery(authorId, sort, sortType){
   const url = new URL(location);
   if(authorId==='all') url.searchParams.delete('author'); else url.searchParams.set('author', authorId);
   if(sort==='desc') url.searchParams.delete('sort'); else url.searchParams.set('sort', sort);
+  if(!sortType || sortType==='all') url.searchParams.delete('type'); else url.searchParams.set('type', sortType);
   history.pushState({}, '', url);
 }
+
 
 // Render: authors bar
 function renderAuthorBar(){
@@ -68,50 +72,54 @@ async function animateSwitch(){
 
 const toTime = (v) => {
   if (!v) return NaN;
-  if (v instanceof Date) return v.getTime();
   const s = String(v).trim();
   if (!s || s.toLowerCase() === 'unknown') return NaN;
-
-  // ISO direct (2025-09-13, 2025-09-13T12:34:56Z)
   const iso = Date.parse(s);
   if (!isNaN(iso)) return iso;
 
-  // DD/MM/YYYY | DD-MM-YYYY | DD.MM.YYYY
   let m = s.match(/^(\d{1,2})[\/\-\.](\d{1,2})[\/\-\.](\d{4})$/);
-  if (m) { const dd=+m[1], mm=+m[2], yy=+m[3]; return new Date(yy, mm-1, dd).getTime(); }
+  if (m) return new Date(+m[3], +m[2]-1, +m[1]).getTime();
 
-  // "Sep 13, 2025" ou "13 Sep 2025"
-  const months = {jan:0,feb:1,mar:2,apr:3,may:4,jun:5,jul:6,aug:7,sep:8,oct:9,nov:10,dec:11};
+  const months={jan:0,feb:1,mar:2,apr:3,may:4,jun:5,jul:6,aug:7,sep:8,oct:9,nov:10,dec:11};
   m = s.match(/^([A-Za-z]{3,})\s+(\d{1,2}),?\s*(\d{4})$/);
-  if (m) { const mon = months[m[1].slice(0,3).toLowerCase()]; if (mon!=null) return new Date(+m[3], mon, +m[2]).getTime(); }
+  if (m){ const mon=months[m[1].slice(0,3).toLowerCase()]; if(mon!=null) return new Date(+m[3],mon,+m[2]).getTime(); }
   m = s.match(/^(\d{1,2})\s+([A-Za-z]{3,})\s+(\d{4})$/);
-  if (m) { const mon = months[m[2].slice(0,3).toLowerCase()]; if (mon!=null) return new Date(+m[3], mon, +m[1]).getTime(); }
-
+  if (m){ const mon=months[m[2].slice(0,3).toLowerCase()]; if(mon!=null) return new Date(+m[3],mon,+m[1]).getTime(); }
   return NaN;
 };
 
-// tri stable: bonnes dates d'abord, "Unknown" en bas; tie-break par ordre d'arrivée
-const cmpByDate = (a, b) => {
+const cmpByDate = (a,b,dir) => {
   const da = toTime(a.date), db = toTime(b.date);
-  const va = isFinite(da), vb = isFinite(db);
-
-  if (va && vb) {
-    if (da !== db) return state.sort === 'asc' ? (da - db) : (db - da);
-    return a._i - b._i; // même date → conserve ordre d'origine
-  }
-  if (va && !vb) return -1;   // a a une vraie date → avant
-  if (!va && vb) return 1;    // b a une vraie date → avant
-  return a._i - b._i;         // deux dates invalides → ordre d'origine
+  const va = isFinite(da),  vb = isFinite(db);
+  if (va && vb) return dir==='asc' ? (da-db) : (db-da);
+  if (va && !vb) return -1;
+  if (!va && vb) return 1;
+  return (a._i - b._i); // stable si dates invalides
 };
+
+const cmpByTypeThenDate = (a,b) => {
+  if (state.sortType && state.sortType !== 'all') {
+    // priorité choisie en premier, puis les deux autres
+    const first = state.sortType;
+    const order = [first, ...['image','gif','video'].filter(t=>t!==first)];
+    const rank = t => {
+      const i = order.indexOf((t||'image'));
+      return i === -1 ? 99 : i;
+    };
+    const rt = rank(a.type), ru = rank(b.type);
+    if (rt !== ru) return rt - ru;
+  }
+  return cmpByDate(a,b,state.sort);
+};
+
 
 
 function getFilteredSorted(){
   let list = state.currentAuthorId==='all'
     ? state.drawings
     : state.drawings.filter(d=>d.authorId===state.currentAuthorId);
-  // sort by date
-  list = list.slice().sort(cmpByDate);
-  return list;
+
+  return list.slice().sort(cmpByTypeThenDate);
 }
 
 // Gallery
@@ -131,18 +139,16 @@ function renderGallery(){
       media = document.createElement('video');
       media.src = d.url;
       if (d.poster) media.setAttribute('poster', d.poster);
-      media.muted = true;      // preview
-      media.autoplay = true;
-      media.loop = true;
-      media.playsInline = true;
-      media.preload = 'metadata';
-      media.controls = false;
+      media.muted = true; media.autoplay = true; media.loop = true;
+      media.playsInline = true; media.preload = 'metadata'; media.controls = false;
     } else {
+      // image OU gif → <img>
       media = new Image();
       media.src = d.url;
       media.alt = 'Drawing';
       media.loading = 'lazy';
     }
+
 
     const badge = el('div','badge');
     badge.textContent = fmtDate(d.date) || '';
@@ -169,10 +175,30 @@ function wireControls(){
   const gridBtn = qs('#gridBtn');
   const masonryBtn = qs('#masonryBtn');
   const sortSel = qs('#sort');
+  const typeSel = qs('#sortType');
 
-  gridBtn.addEventListener('click', ()=>{ state.view='grid'; setPressed(gridBtn,true); setPressed(masonryBtn,false); renderGallery(); });
-  masonryBtn.addEventListener('click', ()=>{ state.view='masonry'; setPressed(gridBtn,false); setPressed(masonryBtn,true); renderGallery(); });
-  sortSel.addEventListener('change', async ()=>{ state.sort = sortSel.value; setQuery(state.currentAuthorId, state.sort); await animateSwitch(); renderGallery(); });
+  gridBtn.addEventListener('click', ()=>{
+    state.view='grid'; setPressed(gridBtn,true); setPressed(masonryBtn,false);
+    renderGallery();
+  });
+  masonryBtn.addEventListener('click', ()=>{
+    state.view='masonry'; setPressed(gridBtn,false); setPressed(masonryBtn,true);
+    renderGallery();
+  });
+
+  sortSel.addEventListener('change', async ()=>{
+    state.sort = sortSel.value;
+    setQuery(state.currentAuthorId, state.sort, state.sortType);
+    await animateSwitch(); renderGallery();
+  });
+
+  if (typeSel){
+    typeSel.addEventListener('change', async ()=>{
+      state.sortType = typeSel.value;
+      setQuery(state.currentAuthorId, state.sort, state.sortType);
+      await animateSwitch(); renderGallery();
+    });
+  }
 }
 
 /* ------- Lightbox (simple) ------- */
@@ -280,16 +306,20 @@ async function boot(){
     if(!res.ok) throw new Error('Failed to load drawings.json');
     const data = await res.json();
     state.authors = data.authors || [];
-    state.drawings = (data.drawings || []).map((d, i) => ({
-      id: d.id, authorId: d.authorId, url: d.url, date: d.date,
-      type: d.type || 'image', poster: d.poster || null,
-      _i: i
+    state.drawings = (data.drawings || []).map((d,i) => ({
+      id:d.id, authorId:d.authorId, url:d.url, date:(d.date||'').trim(),
+      type:d.type || 'image', poster:d.poster || null, _i:i
     }));
 
     // URL params
     const url = new URL(location);
     const pAuthor = url.searchParams.get('author');
     const pSort = url.searchParams.get('sort');
+    const pType = url.searchParams.get('type');
+    qs('#sort').value = state.sort;
+    if (qs('#sortType')) qs('#sortType').value = state.sortType;
+
+    if (pType && ['all','image','gif','video'].includes(pType)) state.sortType = pType;
     if(pAuthor && (pAuthor==='all' || state.authors.some(a=>a.id===pAuthor))) state.currentAuthorId = pAuthor;
     if(pSort && (pSort==='asc' || pSort==='desc')) state.sort = pSort;
 
