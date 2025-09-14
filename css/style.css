@@ -60,8 +60,11 @@ label{color:var(--muted); font-size:13px}
 .masonry .card img,.masonry .card video{ aspect-ratio:auto; object-fit:contain }
 
 /* Lightbox (simple, sans zoom) */
-.lightbox { position: fixed; inset: 0; background: rgba(0,0,0,.75); backdrop-filter: blur(2px); display: none; align-items:center; justify-content:center; z-index:9999; padding:16px }
+.lightbox { position: fixed; inset: 0; background: rgba(0,0,0,.75);
+  backdrop-filter: blur(2px); display: none; align-items:center; justify-content:center;
+  z-index:9999; padding:16px }
 .lightbox.open{ display:flex }
+
 .lightbox-inner{
   position:relative; box-sizing:border-box;
   width:min(96vw,1200px); height:min(92vh,100dvh - 32px);
@@ -69,12 +72,27 @@ label{color:var(--muted); font-size:13px}
   box-shadow:0 20px 60px rgba(0,0,0,.6); padding:12px; display:flex; flex-direction:column; gap:10px;
 }
 .lightbox-top{ display:flex; align-items:center; justify-content:space-between; gap:10px; color:var(--muted); font-size:14px }
-.lightbox-media{ flex:1 1 auto; min-height:0; min-width:0; display:grid; place-items:center; overflow:hidden }
-.lightbox-media img,.lightbox-media video{ max-width:100%; max-height:100%; object-fit:contain; border-radius:12px; background:#0b0d12 }
+
+/* ⬇️ patch: on force le média à occuper TOUT l’espace disponible,
+   puis on le CONTAIN pour éviter tout dépassement/cropping */
+.lightbox-media{
+  flex:1 1 auto; min-height:0; min-width:0;
+  display:grid; place-items:center; overflow:hidden;
+}
+.lightbox-media img,
+.lightbox-media video{
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: contain !important;   /* jamais rogné, jamais “zoomé” */
+  border-radius:12px; background:#0b0d12;
+}
+
 .lightbox-actions{ position:absolute; inset:0; display:flex; align-items:center; justify-content:space-between; pointer-events:none }
-.lightbox-btn{ pointer-events:all; background:rgba(0,0,0,.45); border:1px solid rgba(255,255,255,.1); color:var(--ink); width:44px; height:44px; border-radius:999px; display:grid; place-items:center; cursor:pointer; transition:transform .12s ease, background .12s ease }
+.lightbox-btn{ pointer-events:all; background:rgba(0,0,0,.45); border:1px solid rgba(255,255,255,.1); color:var(--ink);
+  width:44px; height:44px; border-radius:999px; display:grid; place-items:center; cursor:pointer; transition:transform .12s ease, background .12s ease }
 .lightbox-btn:hover{ transform:scale(1.05); background:rgba(0,0,0,.6) }
 .lightbox-close{ position:absolute; top:8px; right:8px }
 .lightbox-footer{ text-align:center; color:var(--muted); font-size:13px }
+
 
 footer{color:var(--muted); font-size:13px; text-align:center; padding:26px 0 40px}
