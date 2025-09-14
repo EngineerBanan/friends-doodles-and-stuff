@@ -66,16 +66,47 @@ async function animateSwitch(){
   app.classList.remove('switching');
 }
 
+const toTime = (v) => {
+  if (!v) return NaN;
+  if (v instanceof Date) return v.getTime();
+  const s = String(v).trim();
+
+  // ISO (2025-09-13, 2025-09-13T18:22:00Z, etc.)
+  const iso = Date.parse(s);
+  if (!isNaN(iso)) return iso;
+
+  // DD/MM/YYYY ou DD-MM-YYYY ou DD.MM.YYYY
+  let m = s.match(/^(\d{1,2})[\/\-\.](\d{1,2})[\/\-\.](\d{4})$/);
+  if (m) { const dd=+m[1], mm=+m[2], yy=+m[3]; return new Date(yy, mm-1, dd).getTime(); }
+
+  // "Sep 13, 2025"
+  const months = {jan:0,feb:1,mar:2,apr:3,may:4,jun:5,jul:6,aug:7,sep:8,oct:9,nov:10,dec:11};
+  m = s.match(/^([A-Za-z]{3,})\s+(\d{1,2}),?\s*(\d{4})$/);
+  if (m) { const mon = months[m[1].slice(0,3).toLowerCase()]; if (mon!=null) return new Date(+m[3], mon, +m[2]).getTime(); }
+
+  // "13 Sep 2025"
+  m = s.match(/^(\d{1,2})\s+([A-Za-z]{3,})\s+(\d{4})$/);
+  if (m) { const mon = months[m[2].slice(0,3).toLowerCase()]; if (mon!=null) return new Date(+m[3], mon, +m[1]).getTime(); }
+
+  return NaN; // non parsable
+};
+
+const cmpByDate = (a, b) => {
+  const da = toTime(a.date), db = toTime(b.date);
+  const badA = !isFinite(da), badB = !isFinite(db);
+  if (badA && badB) return 0;
+  if (badA) return 1;         // dates invalides → toujours à la fin
+  if (badB) return -1;
+  return state.sort === 'asc' ? (da - db) : (db - da);
+};
+
+
 function getFilteredSorted(){
   let list = state.currentAuthorId==='all'
     ? state.drawings
     : state.drawings.filter(d=>d.authorId===state.currentAuthorId);
   // sort by date
-  list = list.slice().sort((a,b)=>{
-    const da = new Date(a.date).getTime();
-    const db = new Date(b.date).getTime();
-    return state.sort==='asc' ? (da-db) : (db-da);
-  });
+  list = list.slice().sort(cmpByDate);
   return list;
 }
 
