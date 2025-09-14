@@ -26,7 +26,7 @@ function setQuery(authorId, sort){
   history.pushState({}, '', url);
 }
 
-// Render
+// Render: authors bar
 function renderAuthorBar(){
   const bar = qs('#authorBar'); bar.innerHTML = '';
   const makeChip = (author) => {
@@ -79,24 +79,29 @@ function getFilteredSorted(){
   return list;
 }
 
+// Gallery
 function renderGallery(){
   const mount = qs('#gallery');
-  // active/désactive le mode masonry (le CSS s'occupe du layout en colonnes)
   mount.className = state.view === 'masonry' ? 'masonry' : '';
 
   const grid = el('div','grid');
-  const list = getFilteredSorted(); // déjà existant
+  const list = getFilteredSorted();
 
   list.forEach((d, idx) => {
     const card = el('article','card');
 
-    // --- média (image par défaut si type absent) ---
+    // media (image by default)
     let media;
     if (d.type === 'video') {
       media = document.createElement('video');
       media.src = d.url;
-      media.controls = true;
+      if (d.poster) media.setAttribute('poster', d.poster);
+      media.muted = true;      // preview
+      media.autoplay = true;
+      media.loop = true;
       media.playsInline = true;
+      media.preload = 'metadata';
+      media.controls = false;
     } else {
       media = new Image();
       media.src = d.url;
@@ -104,14 +109,13 @@ function renderGallery(){
       media.loading = 'lazy';
     }
 
-    // --- badge date ---
     const badge = el('div','badge');
     badge.textContent = fmtDate(d.date) || '';
 
     card.append(media, badge);
     grid.append(card);
 
-    // --- fade-in au scroll ---
+    // fade-in
     const io = new IntersectionObserver((entries, obs) => {
       for (const e of entries) {
         if (e.isIntersecting) { e.target.classList.add('visible'); obs.unobserve(e.target); }
@@ -119,13 +123,12 @@ function renderGallery(){
     }, { rootMargin: '40px' });
     io.observe(card);
 
-    // --- ouverture lightbox au clic ---
+    // open lightbox
     card.addEventListener('click', () => openLightbox(idx, list));
   });
 
   mount.replaceChildren(grid);
 }
-
 
 function wireControls(){
   const gridBtn = qs('#gridBtn');
@@ -137,7 +140,8 @@ function wireControls(){
   sortSel.addEventListener('change', async ()=>{ state.sort = sortSel.value; setQuery(state.currentAuthorId, state.sort); await animateSwitch(); renderGallery(); });
 }
 
-let lightbox, lbMedia, lbDate, lbAuthor, lbIndex = 0, lbList = [];
+/* ------- Lightbox (simple) ------- */
+let lightbox, lbMedia, lbIndex = 0, lbList = [];
 
 function ensureLightbox(){
   if (lightbox) return;
@@ -166,32 +170,31 @@ function ensureLightbox(){
   const lbInfo   = lightbox.querySelector('#lb-info');
   const lbFooter = lightbox.querySelector('#lb-footer');
 
-  // petites helpers
-  lbDate   = (d)=> (new Date(d).toLocaleDateString('en-US',{year:'numeric',month:'short',day:'2-digit'}));
-  lbAuthor = (id)=> (state.authors.find(a=>a.id===id)?.name ?? 'Unknown');
+  const lbDate   = (d)=> (new Date(d).toLocaleDateString('en-US',{year:'numeric',month:'short',day:'2-digit'}));
+  const lbAuthor = (id)=> (state.authors.find(a=>a.id===id)?.name ?? 'Unknown');
 
-  // Click background to close
-  lightbox.addEventListener('click', (e)=>{
-    if(e.target === lightbox) closeLightbox();
-  });
-  // Close button
-  lightbox.querySelector('#lb-close').addEventListener('click', closeLightbox);
-  // Prev/Next
-  lightbox.querySelector('#lb-prev').addEventListener('click', ()=> showLightboxIndex(lbIndex-1));
-  lightbox.querySelector('#lb-next').addEventListener('click', ()=> showLightboxIndex(lbIndex+1));
-  // Keyboard
-  window.addEventListener('keydown', (e)=>{
-    if(!lightbox.classList.contains('open')) return;
-    if(e.key === 'Escape') closeLightbox();
-    else if(e.key === 'ArrowLeft') showLightboxIndex(lbIndex-1);
-    else if(e.key === 'ArrowRight') showLightboxIndex(lbIndex+1);
-  });
-
-  // expose pour mise à jour d'infos
   lightbox.updateInfo = (item)=>{
     lbInfo.textContent = `${lbAuthor(item.authorId)} — ${lbDate(item.date) || ''}`;
     lbFooter.textContent = 'Use ◀ ▶ or click to navigate — Esc to close';
   };
+
+  // backdrop click to close
+  lightbox.addEventListener('click', (e)=>{ if(e.target === lightbox) closeLightbox(); });
+  // buttons
+  lightbox.querySelector('#lb-close').addEventListener('click', closeLightbox);
+  lightbox.querySelector('#lb-prev').addEventListener('click', ()=> showLightboxIndex(lbIndex-1));
+  lightbox.querySelector('#lb-next').addEventListener('click', ()=> showLightboxIndex(lbIndex+1));
+
+  // keyboard (bind once)
+  if (!lightbox._keysBound){
+    lightbox._keysBound = true;
+    window.addEventListener('keydown', (e)=>{
+      if(!lightbox.classList.contains('open')) return;
+      if(e.key === 'Escape') closeLightbox();
+      else if(e.key === 'ArrowLeft') showLightboxIndex(lbIndex-1);
+      else if(e.key === 'ArrowRight') showLightboxIndex(lbIndex+1);
+    });
+  }
 }
 
 function openLightbox(index, list){
@@ -211,41 +214,41 @@ function closeLightbox(){
 }
 
 function showLightboxIndex(idx){
-  if(!lbList.length) return;
-  // wrap
-  if(idx < 0) idx = lbList.length - 1;
-  if(idx >= lbList.length) idx = 0;
+  if (!lbList.length) return;
+  if (idx < 0) idx = lbList.length - 1;
+  if (idx >= lbList.length) idx = 0;
   lbIndex = idx;
 
   const item = lbList[lbIndex];
   lbMedia.innerHTML = '';
 
-  if(item.type === 'video'){
-    const v = document.createElement('video');
-    v.src = item.url;
-    v.controls = true;
-    v.playsInline = true;
-    v.autoplay = true;
-    v.loop = true;
-    v.muted = true;
-    lbMedia.appendChild(v);
-  }else{
-    const img = new Image();
-    img.alt = 'Drawing';
-    img.src = item.url;
-    lbMedia.appendChild(img);
+  let node;
+  if (item.type === 'video') {
+    node = document.createElement('video');
+    node.src = item.url;
+    if (item.poster) node.setAttribute('poster', item.poster);
+    node.controls = true;
+    node.playsInline = true;
+  } else {
+    node = new Image();
+    node.alt = 'Drawing';
+    node.src = item.url;
   }
-  lightbox.updateInfo(item);
+  lbMedia.appendChild(node);
+  if (typeof lightbox.updateInfo === 'function') lightbox.updateInfo(item);
 }
 
-
+/* ------- Boot ------- */
 async function boot(){
   try{
     const res = await fetch(DATA_URL, {cache:'no-store'});
     if(!res.ok) throw new Error('Failed to load drawings.json');
     const data = await res.json();
     state.authors = data.authors || [];
-    state.drawings = (data.drawings || []).map(d=>({ id:d.id, authorId:d.authorId, url:d.url, date:d.date }));
+    state.drawings = (data.drawings || []).map(d => ({
+      id: d.id, authorId: d.authorId, url: d.url, date: d.date,
+      type: d.type || 'image', poster: d.poster || null
+    }));
 
     // URL params
     const url = new URL(location);
@@ -254,7 +257,7 @@ async function boot(){
     if(pAuthor && (pAuthor==='all' || state.authors.some(a=>a.id===pAuthor))) state.currentAuthorId = pAuthor;
     if(pSort && (pSort==='asc' || pSort==='desc')) state.sort = pSort;
 
-    // reflect in UI
+    // reflect UI
     qs('#sort').value = state.sort;
     setPressed(qs('#gridBtn'), state.view==='grid');
     setPressed(qs('#masonryBtn'), state.view==='masonry');
@@ -268,5 +271,4 @@ async function boot(){
     qs('#gallery').innerHTML = `<p style="color:#f88">Could not load <code>drawings.json</code>. Make sure it is next to <code>index.html</code>.</p>`;
   }
 }
-
 boot();
