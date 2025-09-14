@@ -70,34 +70,38 @@ const toTime = (v) => {
   if (!v) return NaN;
   if (v instanceof Date) return v.getTime();
   const s = String(v).trim();
+  if (!s || s.toLowerCase() === 'unknown') return NaN;
 
-  // ISO (2025-09-13, 2025-09-13T18:22:00Z, etc.)
+  // ISO direct (2025-09-13, 2025-09-13T12:34:56Z)
   const iso = Date.parse(s);
   if (!isNaN(iso)) return iso;
 
-  // DD/MM/YYYY ou DD-MM-YYYY ou DD.MM.YYYY
+  // DD/MM/YYYY | DD-MM-YYYY | DD.MM.YYYY
   let m = s.match(/^(\d{1,2})[\/\-\.](\d{1,2})[\/\-\.](\d{4})$/);
   if (m) { const dd=+m[1], mm=+m[2], yy=+m[3]; return new Date(yy, mm-1, dd).getTime(); }
 
-  // "Sep 13, 2025"
+  // "Sep 13, 2025" ou "13 Sep 2025"
   const months = {jan:0,feb:1,mar:2,apr:3,may:4,jun:5,jul:6,aug:7,sep:8,oct:9,nov:10,dec:11};
   m = s.match(/^([A-Za-z]{3,})\s+(\d{1,2}),?\s*(\d{4})$/);
   if (m) { const mon = months[m[1].slice(0,3).toLowerCase()]; if (mon!=null) return new Date(+m[3], mon, +m[2]).getTime(); }
-
-  // "13 Sep 2025"
   m = s.match(/^(\d{1,2})\s+([A-Za-z]{3,})\s+(\d{4})$/);
   if (m) { const mon = months[m[2].slice(0,3).toLowerCase()]; if (mon!=null) return new Date(+m[3], mon, +m[1]).getTime(); }
 
-  return NaN; // non parsable
+  return NaN;
 };
 
+// tri stable: bonnes dates d'abord, "Unknown" en bas; tie-break par ordre d'arrivée
 const cmpByDate = (a, b) => {
   const da = toTime(a.date), db = toTime(b.date);
-  const badA = !isFinite(da), badB = !isFinite(db);
-  if (badA && badB) return 0;
-  if (badA) return 1;         // dates invalides → toujours à la fin
-  if (badB) return -1;
-  return state.sort === 'asc' ? (da - db) : (db - da);
+  const va = isFinite(da), vb = isFinite(db);
+
+  if (va && vb) {
+    if (da !== db) return state.sort === 'asc' ? (da - db) : (db - da);
+    return a._i - b._i; // même date → conserve ordre d'origine
+  }
+  if (va && !vb) return -1;   // a a une vraie date → avant
+  if (!va && vb) return 1;    // b a une vraie date → avant
+  return a._i - b._i;         // deux dates invalides → ordre d'origine
 };
 
 
@@ -276,9 +280,10 @@ async function boot(){
     if(!res.ok) throw new Error('Failed to load drawings.json');
     const data = await res.json();
     state.authors = data.authors || [];
-    state.drawings = (data.drawings || []).map(d => ({
+    state.drawings = (data.drawings || []).map((d, i) => ({
       id: d.id, authorId: d.authorId, url: d.url, date: d.date,
-      type: d.type || 'image', poster: d.poster || null
+      type: d.type || 'image', poster: d.poster || null,
+      _i: i
     }));
 
     // URL params
