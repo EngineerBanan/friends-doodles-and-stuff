@@ -19,9 +19,35 @@ img,video{display:block;max-width:100%;height:auto;background:#0b0d12}
 .title{font-weight:800;letter-spacing:.2px;font-size:clamp(20px,3vw,28px);margin:0 0 6px}
 .subtitle{color:var(--muted);margin:0}
 
-/* Sticky author bar */
-.authors{ position:sticky; top:0; z-index:10; background:linear-gradient(180deg, rgba(15,17,21,.92), rgba(15,17,21,.72)); backdrop-filter:saturate(120%) blur(8px); border-bottom:1px solid var(--ring) }
-.authors-inner{max-width:1100px;margin:0 auto;padding:10px 22px; display:flex; gap:10px; align-items:center; overflow:auto}
+.authors{
+  position: sticky;
+  /* décollée du bord haut + safe area iOS */
+  top: calc(12px + env(safe-area-inset-top));
+  z-index: 50;
+  background: transparent;   /* plus de bande plein écran */
+  border: 0;
+  /* pas de padding ici, on le met sur la capsule interne */
+}
+
+.authors-inner{
+  /* capsule centrée */
+  width: fit-content;
+  max-width: min(100%, 1100px);
+  margin: 0 auto;
+  padding: 8px;
+  display: flex; gap: 10px; align-items: center;
+
+  /* look “flottant” */
+  background: linear-gradient(180deg, #1b2130, #121721);
+  border: 1px solid var(--ring);
+  border-radius: 999px;
+  box-shadow: 0 10px 26px rgba(0,0,0,.35), inset 0 1px 0 rgba(255,255,255,.04);
+  backdrop-filter: saturate(120%) blur(6px);
+
+  /* si beaucoup d’auteurs : scroll horizontal discret */
+  overflow-x: auto; scrollbar-width: none;
+}
+.authors-inner::-webkit-scrollbar{ display:none; }
 .chip{ white-space:nowrap; padding:8px 12px; border:1px solid var(--ring); border-radius:999px; background:var(--panel); color:var(--ink); transition:transform .12s ease, background .12s ease, border-color .12s ease; cursor:pointer; user-select:none; font-weight:600; font-size:14px }
 .chip:hover{transform:translateY(-1px); border-color:#2f3a4f}
 .chip.active{background:linear-gradient(180deg, #1b2130, #161a22); border-color:#3b4a66; box-shadow:0 4px 14px rgba(0,0,0,.25), inset 0 1px 0 rgba(255,255,255,.03)}
