@@ -2,7 +2,8 @@
   "authors": [
     { "id": "cyber",   "name": "Cybervow"},
     { "id": "azeria", "name": "Azeria"},
-    { "id": "limeon", "name": "LimeOn"}
+    { "id": "limeon", "name": "LimeOn"},
+    { "id": "aeon",  "name": "Aeon"}
   ],
   "drawings": [
     { "id": "a1", "authorId": "cyber", "url": "drawings/Cyber/20250811.png", "type":"image", "date": "2025-08-11" },
@@ -52,7 +53,13 @@
     { "id": "c5", "authorId": "limeon",   "url": "drawings/LimeOn/20250825.png",  "type":"image",  "date": "2025-08-25" },
     { "id": "c6", "authorId": "limeon",   "url": "drawings/LimeOn/20250821.png",  "type":"image",  "date": "2025-08-21" },
     { "id": "c7", "authorId": "limeon",   "url": "drawings/LimeOn/20250726.png",  "type":"image",  "date": "2025-07-26" },
-    { "id": "c8", "authorId": "limeon",   "url": "drawings/LimeOn/20250723.png",  "type":"image",  "date": "2025-07-23" }
+    { "id": "c8", "authorId": "limeon",   "url": "drawings/LimeOn/20250723.png",  "type":"image",  "date": "2025-07-23" },
+
+    { "id": "d1", "authorId": "aeon",   "url": "drawings/Aeon/IMG_20250915_101125.webp",  "type":"image",  "date": "2025-09-15" },
+    { "id": "d2", "authorId": "aeon",   "url": "drawings/Aeon/IMG_20250914_170902.webp",  "type":"image",  "date": "2025-09-14" },
+    { "id": "d3", "authorId": "aeon",   "url": "drawings/Aeon/IMG_20250912_151157.webp",  "type":"image",  "date": "2025-09-12" },
+    { "id": "d4", "authorId": "aeon",   "url": "drawings/Aeon/IMG_20250912_141932.webp",  "type":"image",  "date": "2025-09-12" },
+    { "id": "d5", "authorId": "aeon",   "url": "drawings/Aeon/IMG_20250912_140016.webp",  "type":"image",  "date": "2025-09-12" } 
 
   ]
 }
