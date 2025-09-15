@@ -3,8 +3,7 @@
     { "id": "cyber",   "name": "Cybervow"},
     { "id": "azeria", "name": "Azeria"},
     { "id": "limeon", "name": "LimeOn"},
-    { "id": "aeon",   "name": "Aeon"},
-    { "id": "huo", "name": "Huo"}
+    { "id": "aeon",   "name": "Aeon"}
   ],
   "drawings": [
     { "id": "a1", "authorId": "cyber", "url": "drawings/Cyber/20250811.png", "type":"image", "date": "2025-08-11" },
@@ -55,17 +54,6 @@
     { "id": "c6", "authorId": "limeon",   "url": "drawings/LimeOn/20250821.png",  "type":"image",  "date": "2025-08-21" },
     { "id": "c7", "authorId": "limeon",   "url": "drawings/LimeOn/20250726.png",  "type":"image",  "date": "2025-07-26" },
     { "id": "c8", "authorId": "limeon",   "url": "drawings/LimeOn/20250723.png",  "type":"image",  "date": "2025-07-23" },
-
-    { "id": "d1", "authorId": "huo",   "url": "drawings/Huo/Untitled382_20250912180234.png",  "type":"image",  "date": "2025-09-12" },
-    { "id": "d2", "authorId": "huo",   "url": "drawings/Huo/Untitled381_20250911201343.jpg",  "type":"image",  "date": "2025-09-11" },
-    { "id": "d3", "authorId": "huo",   "url": "drawings/Huo/Untitled364_20250831101407.jpg",  "type":"image",  "date": "2025-08-31" },
-    { "id": "d4", "authorId": "huo",   "url": "drawings/Huo/Untitled361_20250829192122.png",  "type":"image",  "date": "2025-08-29" },
-    { "id": "d5", "authorId": "huo",   "url": "drawings/Huo/Untitled346_20250819155748.png",  "type":"image",  "date": "2025-08-19" },
-    { "id": "d6", "authorId": "huo",   "url": "drawings/Huo/Untitled346_20250819154637.png",  "type":"image",  "date": "2025-08-19" },
-    { "id": "d7", "authorId": "huo",   "url": "drawings/Huo/Untitled342_20250817205730.jpg",  "type":"image",  "date": "2025-08-17" },
-    { "id": "d8", "authorId": "huo",   "url": "drawings/Huo/Untitled341_2.mp4.gif",  "type":"gif",  "date": "Unknown" },
-    { "id": "d9", "authorId": "huo",   "url": "drawings/Huo/Untitled340_20250818201613.png",  "type":"image",  "date": "2025-08-18" },
-    { "id": "d10",  "authorId": "huo",   "url": "drawings/Huo/Untitled338_20250813193551.jpg", 	"type":"image", "date": "2025-08-13" },
 
     { "id": "e1", "authorId": "aeon",   "url": "drawings/Aeon/IMG_20250915_101125.webp",  "type":"image",  "date": "2025-09-15" },
     { "id": "e2", "authorId": "aeon",   "url": "drawings/Aeon/IMG_20250914_170902.webp",  "type":"image",  "date": "2025-09-14" },
