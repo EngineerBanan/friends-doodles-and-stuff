@@ -130,7 +130,7 @@ const SOCIAL_MAP = {
     label: v => (String(v).startsWith('@') ? v : '@' + v)
   },
   discord: {
-    icon: 'css/icons/discord.png',
+    icon: 'css/icons/discord.jpg',
     url: v => (v && typeof v === 'object' && v.id ? `https://discord.com/users/${v.id}` : null),
     label: v => (v && typeof v === 'object' ? (v.user || 'Discord') : String(v))
   },
