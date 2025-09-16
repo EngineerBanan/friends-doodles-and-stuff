@@ -125,27 +125,27 @@ const cmpByTypeThenDate = (a,b) => {
 // Icônes & URLs pour chaque réseau
 const SOCIAL_MAP = {
   twitter: {
-    icon: 'css/icons/twitter.png',
+    icon: '../css/icons/twitter.png',
     url: v => 'https://x.com/' + String(v).replace(/^@/, ''),
     label: v => (String(v).startsWith('@') ? v : '@' + v)
   },
   discord: {
-    icon: 'css/icons/discord.jpg',
+    icon: '../css/icons/discord.jpg',
     url: v => (v && typeof v === 'object' && v.id ? `https://discord.com/users/${v.id}` : null),
     label: v => (v && typeof v === 'object' ? (v.user || 'Discord') : String(v))
   },
   instagram: {
-    icon: 'css/icons/instagram.png',
+    icon: '../css/icons/instagram.png',
     url: v => 'https://instagram.com/' + String(v).replace(/^@/, ''),
     label: v => (String(v).startsWith('@') ? v : '@' + v)
   },
   facebook: {
-    icon: 'css/icons/facebook.png',
+    icon: '../css/icons/facebook.png',
     url: v => 'https://facebook.com/' + String(v),
     label: v => String(v)
   },
   website: {
-    icon: 'css/icons/link.png',
+    icon: '../css/icons/link.png',
     url: v => String(v),
     label: v => String(v).replace(/^https?:\/\//,'')
   }
