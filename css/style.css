@@ -166,3 +166,23 @@ footer p{ margin:0 0 10px }
 }
 .icon-btn:hover::after{ opacity:1; transform:translateX(-50%) translateY(0) }
 
+.inline-socials{ display:inline-flex; gap:8px; margin-left:10px; vertical-align:middle }
+.icon-btn.sm{ width:28px; height:28px; border-radius:999px;
+  display:inline-flex; align-items:center; justify-content:center;
+  background:var(--panel); border:1px solid var(--ring);
+  box-shadow:0 4px 10px rgba(0,0,0,.25), inset 0 1px 0 rgba(255,255,255,.04);
+  transition:transform .12s ease, background .12s ease, border-color .12s ease;
+}
+.icon-btn.sm:hover{ transform:translateY(-1px); background:#1b2130; border-color:#3b4a66 }
+.icon-btn.sm img{ width:16px; height:16px; object-fit:contain; display:block }
+
+.icon-btn.sm[data-tip]::after{
+  content: attr(data-tip);
+  position:absolute; bottom:36px; left:50%; transform:translateX(-50%) translateY(6px);
+  padding:6px 10px; font-size:12px; color:var(--ink);
+  background:#0e1117; border:1px solid var(--ring); border-radius:8px;
+  white-space:nowrap; opacity:0; pointer-events:none; transition:opacity .15s ease, transform .15s ease;
+}
+.icon-btn.sm:hover::after{ opacity:1; transform:translateX(-50%) translateY(0) }
+
+

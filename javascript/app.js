@@ -56,12 +56,22 @@ function renderAuthorBar(){
 
 function updateCrumb(){
   const c = qs('#crumb');
-  if(state.currentAuthorId==='all') c.textContent = 'All authors';
-  else{
-    const a = state.authors.find(x=>x.id===state.currentAuthorId);
-    c.textContent = a ? `Author: ${a.name}` : 'All authors';
+  c.innerHTML = '';
+  if (state.currentAuthorId === 'all') {
+    c.textContent = 'All authors';
+    return;
+  }
+  const a = state.authors.find(x => x.id === state.currentAuthorId);
+  const label = document.createElement('span');
+  label.textContent = a ? `Author: ${a.name}` : 'All authors';
+  c.appendChild(label);
+
+  if (a) {
+    const icons = makeSocialIcons(a);
+    if (icons && icons.childElementCount) c.appendChild(icons);
   }
 }
+
 
 async function animateSwitch(){
   const app = qs('#app');
@@ -112,6 +122,98 @@ const cmpByTypeThenDate = (a,b) => {
   return cmpByDate(a,b,state.sort);
 };
 
+// Icônes & URLs pour chaque réseau
+const SOCIAL_MAP = {
+  twitter: {
+    icon: 'css/icons/twitter.png',
+    url: v => 'https://x.com/' + String(v).replace(/^@/, ''),
+    label: v => (String(v).startsWith('@') ? v : '@' + v)
+  },
+  discord: {
+    icon: 'css/icons/discord.png',
+    url: v => (v && typeof v === 'object' && v.id ? `https://discord.com/users/${v.id}` : null),
+    label: v => (v && typeof v === 'object' ? (v.user || 'Discord') : String(v))
+  },
+  instagram: {
+    icon: 'css/icons/instagram.png',
+    url: v => 'https://instagram.com/' + String(v).replace(/^@/, ''),
+    label: v => (String(v).startsWith('@') ? v : '@' + v)
+  },
+  facebook: {
+    icon: 'css/icons/facebook.png',
+    url: v => 'https://facebook.com/' + String(v),
+    label: v => String(v)
+  },
+  website: {
+    icon: 'css/icons/link.png',
+    url: v => String(v),
+    label: v => String(v).replace(/^https?:\/\//,'')
+  }
+};
+
+const isNone = (v) =>
+  v == null ||
+  v === false ||
+  (typeof v === 'string' && v.trim().toLowerCase() === 'none') ||
+  (typeof v === 'string' && v.trim() === '');
+
+function makeSocialIcons(author){
+  const box = document.createElement('span');
+  box.className = 'inline-socials';
+  if (!author) return box;
+
+  if (isNone(author.social)) return box;
+
+  const s = { ...(author.social || {}) };
+  if (!isNone(author.discord) || !isNone(author.discordId)) {
+    s.discord = {
+      user: isNone(author.discord) ? null : author.discord,
+      id:   isNone(author.discordId) ? null : author.discordId
+    };
+  }
+  if (!isNone(author.twitter))   s.twitter   = author.twitter;
+  if (!isNone(author.instagram)) s.instagram = author.instagram;
+  if (!isNone(author.facebook))  s.facebook  = author.facebook;
+  if (!isNone(author.website))   s.website   = author.website;
+
+  for (const [k, v] of Object.entries(s)) {
+    if (isNone(v)) delete s[k];
+    else if (k === 'discord' && typeof v === 'object' && isNone(v.user) && isNone(v.id)) {
+      delete s[k];
+    }
+  }
+
+  let count = 0;
+  for (const key of Object.keys(SOCIAL_MAP)) {
+    const val = s[key];
+    if (!val) continue;
+
+    const map = SOCIAL_MAP[key];
+    const url = map.url(val);
+    const label = map.label(val);
+    if (isNone(label)) continue;
+
+    const node = document.createElement(url ? 'a' : 'span');
+    node.className = 'icon-btn sm';
+    node.setAttribute('aria-label', `${key}: ${label}`);
+    node.setAttribute('data-tip', label);
+    if (url) { node.href = url; node.target = '_blank'; node.rel = 'noopener'; }
+
+    const img = new Image();
+    img.src = map.icon;
+    img.alt = key;
+    node.appendChild(img);
+
+    box.appendChild(node);
+    count++;
+  }
+
+  // Si aucune icône valide => ne rien afficher
+  if (count === 0) {
+    // renvoyer un élément vide permettra aux appelants de tester childElementCount
+  }
+  return box;
+}
 
 
 function getFilteredSorted(){
@@ -235,9 +337,23 @@ function ensureLightbox(){
   const lbAuthor = (id)=> (state.authors.find(a=>a.id===id)?.name ?? 'Unknown');
 
   lightbox.updateInfo = (item)=>{
-    lbInfo.textContent = `${lbAuthor(item.authorId)} — ${lbDate(item.date) || ''}`;
-    lbFooter.textContent = 'Use ◀ ▶ or click to navigate — Esc to close';
+    const lbInfo = lightbox.querySelector('#lb-info');
+    const a = state.authors.find(x=>x.id===item.authorId);
+    const date = (new Date(item.date)).toString() !== 'Invalid Date'
+      ? new Date(item.date).toLocaleDateString('en-US',{year:'numeric',month:'short',day:'2-digit'})
+      : '';
+
+    lbInfo.innerHTML = '';
+    const left = document.createElement('span');
+    left.textContent = `${a ? a.name : 'Unknown'} — ${date}`;
+    lbInfo.appendChild(left);
+
+    if (a) {
+      const icons = makeSocialIcons(a);
+      if (icons && icons.childElementCount) lbInfo.appendChild(icons);
+    }
   };
+
 
   // backdrop click to close
   lightbox.addEventListener('click', (e)=>{ if(e.target === lightbox) closeLightbox(); });
