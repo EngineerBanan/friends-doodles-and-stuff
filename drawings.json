@@ -1,9 +1,9 @@
 {
   "authors": [
-    { "id": "cyber",   "name": "Cybervow", "discord": "cybervow"},
-    { "id": "azeria", "name": "Azeria", "discord": "azeria_licc"},
+    { "id": "cyber",   "name": "Cybervow", "social": {"discord": {"user": "cybervow"}}},
+    { "id": "azeria", "name": "Azeria", "social": {"discord": {"user": "azeria_licc"}}},
     { "id": "limeon", "name": "LimeOn", "social": "None"},
-    { "id": "aeon",   "name": "Aeon", "discord": "brave_flamingo_75912"}
+    { "id": "aeon",   "name": "Aeon", "social": {"discord": {"user": "brave_flamingo_75912"}}}
   ],
   "drawings": [
     { "id": "a1", "authorId": "cyber", "url": "drawings/Cyber/20250811.png", "type":"image", "date": "2025-08-11" },
