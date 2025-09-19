@@ -25,6 +25,12 @@
     { "id": "a17", "authorId": "cyber", "url": "drawings/Cyber/Untitled2395_20250914075543.png", "type":"image", "date": "2025-09-14" },
     { "id": "a18", "authorId": "cyber", "url": "drawings/Cyber/2025-09-16.png", "type":"image", "date": "2025-09-16" },
     { "id": "a19", "authorId": "cyber", "url": "drawings/Cyber/20250918022323.webp", "type":"image", "date": "2025-09-18" },
+    { "id": "a20", "authorId": "cyber", "url": "drawings/Cyber/Untitled1809_20250918081628.webp", "type":"image", "date": "Unknown" },
+    { "id": "a21", "authorId": "cyber", "url": "drawings/Cyber/Untitled2298_20250918081213.webp", "type":"image", "date": "Unknown" },
+    { "id": "a22", "authorId": "cyber", "url": "drawings/Cyber/Untitled2299_20250918081219.webp", "type":"image", "date": "Unknown" },
+    { "id": "a23", "authorId": "cyber", "url": "drawings/Cyber/Untitled2301_20250918081228.webp", "type":"image", "date": "Unknown" },
+    { "id": "a24", "authorId": "cyber", "url": "drawings/Cyber/unknown1.png", "type":"image", "date": "Unknown" },
+    { "id": "a25", "authorId": "cyber", "url": "drawings/Cyber/unknown2.png", "type":"image", "date": "Unknown" },
 
     { "id": "b1", "authorId": "azeria",   "url": "drawings/Azeria/Cha(2)-06-09.png", "type":"image", "date": "2025-09-06" },
     { "id": "b2", "authorId": "azeria",   "url": "drawings/Azeria/drawing-30-08.png", "type":"image", "date": "2025-08-30" },
